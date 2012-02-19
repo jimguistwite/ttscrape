@@ -1,0 +1,16 @@
+#
+# A list of show or movie titles that should be highlighted if found.
+# This is either the exact title name or 'contains:<blah>' where blah
+# sequence of characters to match in the title
+#
+Schindler's List
+Creature from the Black Lagoon
+The Day After
+Kronos
+Rambo: First Blood
+Seven Pounds
+1408: Unrated Version
+The Departed
+Horrible Bosses
+Thor
+Larry Crowne

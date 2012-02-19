@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd"
+[
+ <!-- Formatting patterns -->
+ <!ENTITY pc "&#x25;">
+ <!ENTITY debugPattern "&pc;n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -&pc;n[&pc;d{DATE}] [&pc;p] [&pc;c]&pc;n[Thread: &pc;t]&pc;n[Method: &pc;M]&pc;n[Line Number: &pc;L]&pc;n[&pc;m]&pc;n&pc;n">
+ <!ENTITY runPattern "&pc;n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -&pc;n[&pc;d{DATE}] [&pc;p] [&pc;c]&pc;n[&pc;m]&pc;n&pc;n">
+
+ 
+ <!-- Current pattern -->
+ <!ENTITY pattern "&runPattern;">
+]
+>
+
+<!--
+  Q: How do I control the logging?
+  A: The easiest way is to set level tag of the root element to the highest level output you would like to
+  see.  Log4J currently supports the following levels:
+  OFF - turns off all logging
+  FATAL - very severe error events that will likely lead to an application to abort
+  ERROR - error events that might still allow the application to continue running
+  WARN - potentially harmful situations
+  INFO - informational messages that highlight the progress of the application at a coarse-grained level
+  DEBUG - fine-grained informational events that are most useful for debugging an application
+  ALL - turns on all logging
+  
+  Q: How do I disable all logging?
+  A: Set the root level tag to OFF.  This will disable logging entirely. Use with care because warning
+  and error messages will no longer be emitted.
+  
+  Q: What is a threshold?
+  A: Thresholds are a way to filter out messages that go to an appender.  For example, if you look at
+  the STDOUT appender above, you'll notice that it has a threshold set to WARN.  This means that even
+  if the default logging level is set to ALL, only messages of level WARN or above get written to
+  the appender.  Everything else gets turned away at the front door.
+  
+  Q: I can't get my logging to work exactly the way I want.  Is there a way to see if my settings are correct?
+  A: If you mistype a setting, Log4J will revert to a reasonable default without telling you that it did so.
+  You can see what Log4J is doing by enabling its debugging flag.  Simply change
+  log4j:configuration debug="false" to log4j:configuration debug="true".  Look at the top of this file
+  to see what I mean.
+-->
+
+<log4j:configuration debug="false"
+  xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+  <!--
+    ****************************************************************************
+    * Appender definitions
+    ****************************************************************************
+  -->
+
+  <!-- This appender writes to stdout -->
+  <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="&pattern;" />
+    </layout>
+  </appender>
+
+  <appender name="FILE"
+    class="org.apache.log4j.RollingFileAppender">
+    <param name="File" value="fetcher.trace" />
+    <param name="MaxFileSize" value="1024KB" />
+    <param name="MaxBackupIndex" value="5" />
+    <param name="Append" value="false" />
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="&pattern;" />
+    </layout>
+  </appender>
+
+  <appender name="HTMLUNIT"
+    class="org.apache.log4j.RollingFileAppender">
+    <param name="File" value="htmlunit.trace" />
+    <param name="MaxFileSize" value="4096KB" />
+    <param name="MaxBackupIndex" value="10" />
+    <param name="Append" value="false" />
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="&pattern;" />
+    </layout>
+  </appender>
+
+  <!--
+    ****************************************************************************
+    * Logger definitions
+    ****************************************************************************
+  -->
+
+  <logger name="com" additivity="false">
+    <level value="TRACE" />
+    <appender-ref ref="FILE" />
+  </logger>
+
+  <logger name="com.gargoylesoftware" additivity="false">
+    <level value="DEBUG" />
+    <appender-ref ref="HTMLUNIT" />
+  </logger>
+  
+  <logger name="org" additivity="false">
+    <level value="WARN" />
+    <appender-ref ref="FILE" />
+  </logger>
+
+  <logger name="net" additivity="false">
+    <level value="WARN" />
+    <appender-ref ref="FILE" />
+  </logger>
+
+  <logger name="httpclient" additivity="false">
+    <level value="WARN" />
+    <appender-ref ref="FILE" />
+  </logger>
+
+
+  <!-- Assign defaults for all loggers -->
+  <root>
+    <level value="TRACE" />
+    <appender-ref ref="FILE" />
+  </root>
+  
+</log4j:configuration>

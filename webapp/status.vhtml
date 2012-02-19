@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>Titan TV Scraper</title>
+
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery.ui.all.css">
+  
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
+
+<style type="text/css">
+.text { 
+    color: black; 
+    position: absolute;
+}
+
+.shows
+{
+font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;
+width:100%;
+border-collapse:collapse;
+}
+.shows td, #shows th 
+{
+font-size:1.2em;
+border:1px solid #98bf21;
+padding:3px 7px 2px 7px;
+}
+.shows th 
+{
+font-size:1.4em;
+text-align:left;
+padding-top:5px;
+padding-bottom:4px;
+background-color:#A7C942;
+color:#fff;
+}
+.shows tr.alt td 
+{
+color:#000;
+background-color:#EAF2D3;
+}
+
+</style>
+
+</head>
+
+<script>
+  $(function() {
+    $( "#tabs" ).tabs();
+    $( "#progressbar" ).progressbar({
+      value: ${controller.progressAsPercent}
+    });
+    initWebSocket();
+  });
+  
+  var socket;
+  
+  function initWebSocket() {
+    var url = "ws://localhost:${port}/wsock";
+    if ('WebSocket' in window) {
+      socket = new WebSocket(url, "events");
+    }
+    else if ('MozWebSocket' in window) {
+      socket = new MozWebSocket(url, "events");
+    }
+    else {
+      console.warn("no web socket available");
+      return;
+    }
+    
+    socket.onmessage = function(event) {
+      var msg = jQuery.parseJSON(event.data);
+      console.debug(msg);
+      if (msg.action == "progress") {
+        $('#mode').html(msg.mode);
+        $('#progressbar').progressbar( "option", "value", parseInt(msg.value) );
+        $('#progressbar span.text').text(msg.value + "%");
+      }
+    };
+    socket.onopen = function(event) {
+      console.debug("socket open");
+    };
+    socket.onerror = function(event) {
+      console.error("socket error " + event.data);
+    };
+         
+  }
+  
+  function ignore(sId) {
+    console.debug("ignore " + sId);
+    var data = {'id':sId};
+    $.ajax({type:'POST', url:'ignore', data: data,
+            success: function(resultdata, sStat, jqXHR) {
+              console.debug(resultdata.status);
+              if ("success" == resultdata.status) {
+                alert("Item added to ignored titles list");
+              }
+              else {
+                alert(resultdata.error);
+              }
+            },
+            dataType: 'json'});
+  }
+  
+  function runRead() {
+    $.ajax({
+    url: "runRead",
+    cache: false,
+    success: function(html){
+      //alert("Operation In Progress");
+    }
+  });
+  }
+
+  function runFetch() {
+    $.ajax({
+    url: "runFetch",
+    cache: false,
+    success: function(html){
+      //alert("Operation In Progress");
+    }
+  });
+  }
+  
+  function toggleDetail(key,id) {
+    console.debug("toggle detail " + key + " " + id);
+    var theDiv = document.getElementById("details_" + key + "_" + id);
+    var theArrow = document.getElementById("arrow_" + key + "_" + id);
+    if (theDiv.style.display == "none") {
+      theDiv.style.display="block";
+      theArrow.src="/static/arrow2_down_green.png";
+    }
+    else {
+      theDiv.style.display="none";
+      theArrow.src="/static/arrow2_right_green.png";
+    }
+  }
+</script>
+  
+<body>
+
+<button onclick="runRead()">Read Shows</button>
+<button onclick="runFetch()">Fetch Shows</button>
+
+<p>
+Mode: <span id="mode">${controller.mode}</span>
+</p>
+<div style="height:22px" id="progressbar"><span class="text">${controller.progressAsPercent}%</span></div>
+<br/>
+<div id="tabs">
+  <ul>
+#foreach($key in $showListMap.keySet())  
+    <li><a href="#${key}">$restool.get($key)</a></li>
+#end
+  </ul>
+  
+#foreach($key in $showListMap.keySet())  
+  <div id="$key">
+  <table class="shows">
+  <tr><th style="width:50px">Links</th><th>Title</th><th>Date/Time</th><th>Channel</th></tr>
+#foreach( $s in $showListMap.get($key) )
+  <tr>
+    <td><a href="javascript:ignore($s.id)"><img src="/static/Trash.png"/></a>
+    <a title="Search IMDB" target="imdb" href="http://www.imdb.com/find?q=$s.title&s=tt"><img src="/static/window_next.png"/></a>
+    </td>
+  <td style="height:30px">
+#set( $akey = "arrow" + "_" + $key + "_" + $velocityCount )
+  <img id="$akey" onclick="toggleDetail('$key',$velocityCount)" src="/static/arrow2_right_green.png"/> 
+  $s.title
+#if($s.hd || $s.year != 0)
+(
+#if ($s.hd)
+HD
+#end
+#if ($s.year != 0) 
+$s.year
+#end
+#if ($s.stars > 0)
+#foreach ($idx in [1..$s.stars])
+<img src="/static/star2_green.png"/>
+#end
+#end
+)
+#end
+#set( $dkey = "details" + "_" + $key + "_" + $velocityCount )
+<div id="$dkey" style="display:none;font-size:small">
+$!s.subtitle
+</div>
+</td>
+<td style="white-space: nowrap;">$datetool.format('short', $s.startTime)</td>
+<td style="white-space: nowrap;">$s.channelName $s.channelNumber</td>
+ </tr>
+#end    
+</table> 
+  </div>
+#end
+  
+</body>
+</html>

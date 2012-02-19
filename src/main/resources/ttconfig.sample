@@ -1,0 +1,9 @@
+# login for titantv.com
+account.login=
+
+# password for titantv.com
+account.password=
+
+# what HTTP port should the webapp listen on.
+# connect to http://localhost:<port>/ttscrape/status
+http.port=8090
