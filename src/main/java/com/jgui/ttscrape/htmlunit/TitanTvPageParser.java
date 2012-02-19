@@ -31,6 +31,13 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTable;
 import com.jgui.ttscrape.Show;
 
+/**
+ * The <code>TitanTvPageParser</code> class parses the high level content
+ * from the page then delegates to the GridParser for the listings content.
+ * 
+ * @author jguistwite
+ */
+
 public class TitanTvPageParser {
 	private Logger logger = LoggerFactory.getLogger(TitanTvPageParser.class);
 

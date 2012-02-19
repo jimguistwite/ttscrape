@@ -16,12 +16,6 @@
 
 package com.jgui.ttscrape.webclient;
 
-/**
- * The <code>JettyServer</code> 
- * 
- * @author jguistwite
- */
-
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -35,8 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
-* The <code>JettyServer</code> is an embedded Jetty server instance to handle
-* traffic supporting the web services, RESTful services and web browser traffic.
+* The <code>JettyServer</code> is an embedded Jetty server instance.
 * 
 * @author jguistwite
 */
@@ -89,8 +82,7 @@ public class JettyServer {
    h.setClassLoader(Thread.currentThread().getContextClassLoader());
    h.setHandler(rootHandler);
    handlerList.addHandler(h);
-   
-   //handlerList.addHandler(new DefaultHandler());
+
    server.setHandler(handlerList);
 
    try {

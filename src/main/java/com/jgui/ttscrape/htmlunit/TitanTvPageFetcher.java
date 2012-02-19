@@ -42,6 +42,13 @@ import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 
+/**
+ * The <code>TitanTvPageFetcher</code> class uses HtmlUnit to retrieve
+ * content from the titantv.com site.
+ * 
+ * @author jguistwite
+ */
+
 public class TitanTvPageFetcher {
   private Logger logger = LoggerFactory.getLogger(TitanTvPageFetcher.class);
   private WebClient webClient;
@@ -55,7 +62,7 @@ public class TitanTvPageFetcher {
   }
 
   /**
-   * Login to the site and hang onto that initial page.
+   * Initialize the HtmlUnit web client.
    */
   public boolean init() {
     boolean rv = true;
@@ -151,20 +158,16 @@ public class TitanTvPageFetcher {
 
     HtmlElement grid = current.getElementById("ctl00_Main_TVL_ctl00_Grid");
 
-    // long now = System.currentTimeMillis();
     List<HtmlElement> navCells = grid.getElementsByAttribute("td", "class", "gridHeaderNavRightCell");
     if ((navCells != null) && (navCells.size() != 0)) {
       long newnow = System.currentTimeMillis();
-      // logger.debug("time to find nav button with getElements is {}", (newnow
-      // - now));
       HtmlElement cell = navCells.get(0);
-      //logger.debug("clicking on {} ", cell.asXml());
       cell.click();
       long after = System.currentTimeMillis();
       logger.debug("time to fetch next results {}", (double) (after - newnow) / 1000d);
 
-      // click can return content from a different window, so ignore the result
-      // instead, loop though and find the top window which should be the original
+      // click can return content from a different window, so ignore the result.
+      // Instead, loop though and find the top window which should be the original.
       List<WebWindow> windows = webClient.getWebWindows();
       for(WebWindow ww: windows) {
         if (ww instanceof TopLevelWindow) {
@@ -179,7 +182,7 @@ public class TitanTvPageFetcher {
         writer.close();
       }
 
-      //re-get the grid element
+      //find the grid an log the new time.
       grid = rv.getElementById("ctl00_Main_TVL_ctl00_Grid");
       List<HtmlElement> ghcNow = grid.getElementsByAttribute("span", "class", "ghcNow");
       if ((ghcNow != null) && (ghcNow.size() != 0)) {

@@ -28,7 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The <code>TextualShowWriter</code>
+ * The <code>TextualShowWriter</code> writes shows to a results
+ * folder flagged by the post processors.
  * 
  * @author jguistwite
  */
@@ -79,6 +80,12 @@ public class TextualShowWriter implements ShowWriter {
     }
   }
 
+  /**
+   * Append the show the show file.  Write the title, subtitle
+   * rating and date/time.
+   * @param writerName name of the writer previously established
+   * @param s show to be written. 
+   */
   @Override
   public void writeShow(String writerName, Show s) {
     try {

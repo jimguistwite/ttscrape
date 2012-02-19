@@ -39,7 +39,8 @@ import org.slf4j.LoggerFactory;
 import com.jgui.ttscrape.ClientNotifier;
 
 /**
- * The <code>MyWebSocketHandler</code> 
+ * The <code>MyWebSocketHandler</code> is a web socket handler
+ * for the Jetty server.
  * 
  * @author jguistwite
  */
@@ -108,27 +109,14 @@ public class MyWebSocketHandler extends WebSocketHandler implements ClientNotifi
     }
 
     /**
-     * When a message is received from a client, broadcast it to
-     * the other clients.  Not sure what I'll use this for but
-     * it remains from the chat server that I used as a basis for this.
+     * We don't expect input from the clients but could in the future.
+     * @param data input from client.
      */
     public void onMessage(String data) {
-      //logger.debug("on message {}", data);
-      for (ClientWebSocket webSocket : webSockets) {
-        try {
-          webSocket.connection.sendMessage(data);
-        }
-        catch (IOException ex) {
-          logger.warn("exception sending to client " + webSocket, ex);
-          webSocket.connection.disconnect();
-          // TODO: might get a concurrent modification exception
-          webSockets.remove(webSocket);
-        }
-      }
+      logger.debug("on message {}", data);
     }
 
     public void onClose(int closeCode, String message) {
-      //logger.debug("on close");
       webSockets.remove(this);
     }
   }

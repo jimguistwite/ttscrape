@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -41,7 +42,10 @@ import com.jgui.ttscrape.ShowFilter;
 import com.jgui.ttscrape.ShowPostProcessor;
 
 /**
- * The <code>FetchController</code> class controls overall fetching and IO of shows.
+ * The <code>FetchController</code> class controls overall fetching and IO of
+ * shows.
+ *
+ * @author jguistwite
  */
 
 @Component
@@ -104,17 +108,21 @@ public class FetchController {
         }
       });
 
-      processShows(shows);
+      HashSet<Long> prev = new HashSet<Long>();
+      processShows(prev,shows);
     }
     catch (IOException ex) {
       logger.error("failed to read", ex);
     }
   }
 
+  /**
+   * Fetch shows using the titantv.com page fetcher and parser.
+   */
   public void fetch() {
     logger.debug("Fetch controller running");
     fetcher.setWriteContent(writeContent);
-    
+
     try {
       if (postProcessors != null) {
         for (ShowPostProcessor spp : postProcessors) {
@@ -133,9 +141,15 @@ public class FetchController {
       mode = "Fetch";
       notifier.notifyClient("progress", "value", String.valueOf((int) (100 * progress)), "mode", mode);
 
-      // re-init.
+      // re-init before logging in.
       fetcher.init();
-      
+
+      // when moving from one web page to another containing listings,
+      // shows that overlap the previous period are duplicated.
+      // To work around this, we store a set of keys from the current
+      // listing to be used to remove duplicates in the next listing.
+      HashSet<Long> previousKeys = new HashSet<Long>();
+
       HtmlPage currentPage = fetcher.login();
       if (currentPage == null) {
         logger.error("TT login failed");
@@ -150,7 +164,7 @@ public class FetchController {
       if (isWriteShows()) {
         writeShows(shows, "shows1.txt");
       }
-      processShows(shows);
+      previousKeys = processShows(previousKeys, shows);
 
       // As of 11/21/09, this works. 'Pressing' the next button
       // updates the dom and the login results page now
@@ -174,7 +188,7 @@ public class FetchController {
         if (isWriteShows()) {
           writeShows(shows, "shows" + i + ".txt");
         }
-        processShows(shows);
+        previousKeys = processShows(previousKeys, shows);
       }
       notifier.notifyClient("progress", "value", String.valueOf(100), "mode", "Idle");
     }
@@ -206,13 +220,20 @@ public class FetchController {
     }
   }
 
-  public void processShows(List<Show> shows) {
+  public HashSet<Long> processShows(HashSet<Long> previousKeys, List<Show> shows) {
+    HashSet<Long> newKeys = new HashSet<Long>();
     for (Show s : shows) {
+      newKeys.add(s.getDetailKey());
       boolean keeper = true;
-      for (ShowFilter f : filters) {
-        if (f.exclude(s)) {
-          keeper = false;
-          break;
+      if (previousKeys.contains(s.getDetailKey())) {
+        keeper = false;
+      }
+      else {
+        for (ShowFilter f : filters) {
+          if (f.exclude(s)) {
+            keeper = false;
+            break;
+          }
         }
       }
       if (keeper) {
@@ -221,6 +242,7 @@ public class FetchController {
         }
       }
     }
+    return newKeys;
   }
 
   public TitanTvPageFetcher getFetcher() {
@@ -233,7 +255,9 @@ public class FetchController {
 
   protected void writeShows(List<Show> shows, String filename) throws IOException {
     if (shows != null) {
-      FileWriter showwriter = new FileWriter("results/" + filename);
+      File f = new File("results/" + filename);
+      f.getParentFile().mkdirs();
+      FileWriter showwriter = new FileWriter(f);
       for (Show s : shows) {
         showwriter.write(s.toString());// s.format());
         showwriter.write("\n");

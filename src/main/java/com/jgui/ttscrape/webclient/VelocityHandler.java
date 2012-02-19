@@ -110,7 +110,8 @@ public class VelocityHandler extends AbstractHandler {
     if (urlMethodNameMap == null) {
       urlMethodNameMap = new HashMap<String, InvocationInfo>();
     }
-    // scan the delegate.
+
+    // scan the delegate for Spring RequestMapping annotations.
     for (Method m : delegate.getClass().getMethods()) {
       RequestMapping mapping = m.getAnnotation(RequestMapping.class);
       if (mapping != null) {
@@ -118,8 +119,8 @@ public class VelocityHandler extends AbstractHandler {
         for (String s : values) {
           boolean isVelocity = false;
           boolean isJson = false;
-          Class[] args = m.getParameterTypes();
-          for (Class k : args) {
+          Class<?>[] args = m.getParameterTypes();
+          for (Class<?> k : args) {
             if (k == VelocityContext.class) {
               isVelocity = true;
             }
@@ -148,7 +149,6 @@ public class VelocityHandler extends AbstractHandler {
       uriPath = uriPath.substring(1);
     }
     logger.debug("request for " + uriPath);
-    
 
     String velocityFile = null;
     try {
@@ -170,9 +170,8 @@ public class VelocityHandler extends AbstractHandler {
         if (rv instanceof String) {
           velocityFile = rv.toString();
         }
-        // if the template file was provided by the controller method, dispatch
-        // to
-        // it.
+        // if the template file was provided by the controller method,
+        // dispatch to it.
         if (velocityFile != null) {
           Template template = engine.getTemplate(velocityFile);
           StringWriter writer = new StringWriter();
@@ -189,25 +188,25 @@ public class VelocityHandler extends AbstractHandler {
         String input = IOUtils.toString(is);
         logger.debug("got " + input);
         JSONObject jreq = new JSONObject(input);
-        JSONObject jrsp = (JSONObject)ii.method.invoke(delegate, jreq, req, rsp);
+        JSONObject jrsp = (JSONObject) ii.method.invoke(delegate, jreq, req, rsp);
         if (jrsp != null) {
           String result = jrsp.toString();
           byte[] bytes = result.getBytes("UTF-8");
           rsp.setContentType("text/json");
           rsp.setContentLength(bytes.length);
           rsp.setStatus(200);
-          rsp.getOutputStream().write(bytes);          
+          rsp.getOutputStream().write(bytes);
         }
       }
       else {
-        JSONObject jrsp = (JSONObject)ii.method.invoke(delegate, req, rsp);
+        JSONObject jrsp = (JSONObject) ii.method.invoke(delegate, req, rsp);
         if (jrsp != null) {
           String result = jrsp.toString();
           byte[] bytes = result.getBytes("UTF-8");
           rsp.setContentType("text/json");
           rsp.setContentLength(bytes.length);
           rsp.setStatus(200);
-          rsp.getOutputStream().write(bytes);          
+          rsp.getOutputStream().write(bytes);
         }
       }
 
@@ -232,12 +231,12 @@ public class VelocityHandler extends AbstractHandler {
     context.put("numtool", new NumberTool());
 
     ResourceTool rt = new ResourceTool();
-    //rt.bundle("TT");
-    HashMap<String,String> args = new HashMap<String,String>();
+    HashMap<String, String> args = new HashMap<String, String>();
     args.put(ResourceTool.BUNDLES_KEY, "TT");
     rt.configure(args);
     context.put("restool", rt);
-    
+
+    // see if the delegate cares to do anything.
     try {
       Method m = delegate.getClass().getMethod("initVelocityContext", VelocityContext.class);
       m.invoke(delegate, context);

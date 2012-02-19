@@ -20,6 +20,14 @@ import javax.annotation.Resource;
 
 import org.springframework.stereotype.Component;
 
+/**
+ * The <code>MovieRatingProcessor</code> creates show writer instances
+ * for "star3" and "star4" to output movies and shows with a titantv
+ * rating of 3.5 or 4. 
+ * 
+ * @author jguistwite
+ */
+
 @Component
 public class MovieRatingProcessor implements ShowPostProcessor {
 

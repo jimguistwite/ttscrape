@@ -35,7 +35,8 @@ import com.jgui.ttscrape.Show;
 import com.jgui.ttscrape.htmlunit.FetchController;
 
 /**
- * The <code>TTScrapeController</code> 
+ * The <code>TTScrapeController</code> handles requests
+ * from the web client.
  * 
  * @author jguistwite
  */
@@ -54,6 +55,14 @@ public class TTScrapeController {
   
   private int port;
   
+  /**
+   * Handle the status page.  Populate the velocity context and dispatch
+   * to the "status.vhtml" page.
+   * @param req http request
+   * @param rsp http response
+   * @param ctx velocity context to populate.
+   * @return what velocity file to dispatch to.
+   */
   @RequestMapping("status")
   public String status(HttpServletRequest req, HttpServletResponse rsp, VelocityContext ctx) {
     Map<String,ArrayList<Show>> map = writer.getShowListMap();
@@ -70,6 +79,13 @@ public class TTScrapeController {
     return "status.vhtml";
   }
 
+  /**
+   * Handle an http request to ignore a particular title in the future.
+   * @param req request containing the id of the show to ignore.
+   * @param rsp http servlet response to write JSON response to.
+   * @return JSON data to send
+   * @throws JSONException thrown in the event creation of the json response fails.
+   */
   @RequestMapping("ignore")
   public JSONObject ignore(HttpServletRequest req, HttpServletResponse rsp) throws JSONException {
     JSONObject rv = null;
@@ -89,6 +105,13 @@ public class TTScrapeController {
     return rv;
   }
 
+  /**
+   * Handle an http request to read the previous collection of shows.
+   * @param req HTTP request
+   * @param rsp HTTP response to write JSON response to.
+   * @return JSON data to send
+   * @throws JSONException thrown in the event creation of the json response fails.
+   */
   @RequestMapping("runRead")
   public JSONObject runread(HttpServletRequest req, HttpServletResponse rsp) throws JSONException {
     Thread t = new Thread(new Runnable() {
@@ -100,6 +123,13 @@ public class TTScrapeController {
     return createJsonResponse(rsp, "success", "");
   }
 
+  /**
+   * Handle an HTTP request to fetch shows.
+   * @param req request containing the id of the show to ignore.
+   * @param rsp response to write json response to.
+   * @return JSON data to send
+   * @throws JSONException thrown in the event creation of the json response fails.
+   */
   @RequestMapping("runFetch")
   public JSONObject runfetch(HttpServletRequest req, HttpServletResponse rsp) throws JSONException {
     Thread t = new Thread(new Runnable() {

@@ -25,7 +25,8 @@ import com.jgui.ttscrape.ShowWriter;
 import com.jgui.ttscrape.TextualShowWriter;
 
 /**
- * The <code>WebShowWriter</code> 
+ * The <code>WebShowWriter</code> collects shows for
+ * display via the html client.
  * 
  * @author jguistwite
  */

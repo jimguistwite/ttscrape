@@ -36,7 +36,15 @@ import com.gargoylesoftware.htmlunit.html.HtmlTable;
 import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
 import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 import com.jgui.ttscrape.Show;
-import com.jgui.ttscrape.ShowPostProcessor;
+
+/**
+ * The <code>GridParser</code> class parses a table of listings. It's been
+ * stable for since late 2009 but is subject to major changes when the
+ * titantv.com site is overhauled. Note: the Chrome browser developer tools aids
+ * greatly when inspecting the DOM.
+ * 
+ * @author jguistwite
+ */
 
 public class GridParser {
 
@@ -77,6 +85,15 @@ public class GridParser {
     }
   }
 
+  /**
+   * Parse the table of shows.
+   * 
+   * @param gridStartDate
+   *          times on the html page are relative to this date.
+   * @param tbl
+   *          html markup to be parsed
+   * @return collection of shows generated from markup
+   */
   public List<Show> parseGrid(Calendar gridStartDate, HtmlTable tbl) {
     ArrayList<Show> shows = new ArrayList<Show>();
 
@@ -97,6 +114,15 @@ public class GridParser {
     return shows;
   }
 
+  /**
+   * Parse a row in the table into a sequence of shows.
+   * 
+   * @param gridStartTime
+   *          the start time of the first show in the column.
+   * @param row
+   *          row to be parsed.
+   * @return collection of shows generated for this row.
+   */
   private List<Show> parseListingRow(Date gridStartTime, HtmlTableRow row) {
     ArrayList<Show> rv = new ArrayList<Show>();
 
@@ -127,8 +153,6 @@ public class GridParser {
         if ("gridCallSignCell".equals(cellClass)) {
           // extract grid call sign text span cell.
           for (HtmlElement el : cell.getChildElements()) {
-            // for (HtmlElement el : cell.getElementsByTagName("span")) { //
-            // might shave a hare off of time.
             if ("gridCallSignText".equals(el.getAttribute("class"))) {
               currentChannelName = el.asText();
               break;

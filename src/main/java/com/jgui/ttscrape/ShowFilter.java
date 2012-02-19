@@ -27,8 +27,22 @@ package com.jgui.ttscrape;
  */
 
 public interface ShowFilter {
+  
+  /**
+   * Return true to exclude a show from output.
+   * @param s show to be filtered
+   * @return true if the show should be excluded from processing
+   */
   public boolean exclude(Show s);
+  
+  /**
+   * Begin processing shows.
+   */
   public void beginSequence();
+  
+  /**
+   * End a sequence of shows.
+   */
   public void endSequence();
 }
 
