@@ -11,7 +11,7 @@
 
   <properties>
     <spring.version>3.1.1.RELEASE</spring.version>
-    <jettyVersion>8.0.4.v20111024</jettyVersion>
+    <jettyVersion>9.4.48.v20220622</jettyVersion>
     <mortbayVersion>3.0.20100224</mortbayVersion>
   </properties>
 
